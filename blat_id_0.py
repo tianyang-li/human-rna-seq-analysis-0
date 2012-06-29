@@ -15,6 +15,15 @@
 #
 #  You should have received a copy of the GNU General Public License
 
-import utils.blat_0
+import getopt
+import sys
 
+from utils.blat_0 import blat_reader
 
+def main():
+    blat_file = None
+    if not blat_file:
+        print >> sys.stderr, "missing"
+
+if __name__ == '__main__':
+    main()
