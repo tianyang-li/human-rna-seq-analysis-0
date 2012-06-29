@@ -37,6 +37,7 @@ def main():
         or not blat_file2):
         print >> sys.stderr, "missing"
         sys.exit(1)
+
     
 
 if __name__ == '__main__':

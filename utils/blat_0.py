@@ -72,4 +72,15 @@ def blat_reader(blat_file):
         for line in fin:
             yield BlatEntry(line)
 
+def paired_end(blat_file1, blat_file2):
+    """
+    assumes that PSL files are already sorted like this
+        sort -k10,10 -k14,14
+    1st sorted by qName, then by tName
+    
+    each pair the name is like this:
+        X/1    X/2
+    """
+    
+    
 
