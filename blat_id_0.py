@@ -38,7 +38,8 @@ def main():
             # reference genome FASTA
             ref_file = arg
     if (not blat_file1 
-        or not blat_file2):
+        or not blat_file2
+        or not ref_file):
         print >> sys.stderr, "missing"
         sys.exit(1)
 
