@@ -60,11 +60,11 @@ class BlatEntry(object):
         self.T_start = int(entries[15])
         self.T_end = int(entries[16])
         self.block_count = int(entries[17])
-        self.block_sizes = entries[18].split(",")
+        self.block_sizes = entries[18].split(",")[:-1]
         self.block_sizes = map(lambda s: int(s), self.block_sizes)
-        self.Q_starts = entries[19].split(",")
+        self.Q_starts = entries[19].split(",")[:-1]
         self.Q_starts = map(lambda s:int(s), self.Q_starts)
-        self.T_starts = entries[20].split(",")
+        self.T_starts = entries[20].split(",")[:-1]
         self.T_starts = map(lambda s:int(s), self.T_starts)
 
 def blat_reader(blat_file):
