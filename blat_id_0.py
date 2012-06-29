@@ -21,9 +21,26 @@ import sys
 from utils.blat_0 import blat_reader
 
 def main():
-    blat_file = None
-    if not blat_file:
+    blat_file1, blat_file2 = None, None
+    ref_file = None
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], '',
+                                   ['blat1', 'blat2', 'ref'])
+    except getopt.GetoptError as err:
+        print >> sys.stderr, str(err)
+        sys.exit(1)
+    for opt, arg in opts:
+        if opt == '--blat1':
+            blat_file1 = arg
+        if opt == '--blat2':
+            blat_file2 = arg
+        if opt == '--ref':
+            # reference genome FASTA
+            ref_file = arg
+    if (not blat_file1 
+        or not blat_file2):
         print >> sys.stderr, "missing"
+        sys.exit(1)
 
 if __name__ == '__main__':
     main()
