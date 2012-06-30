@@ -87,7 +87,7 @@ class BlatEntry(object):
                          self.Q_start,
                          self.Q_end,
                          self.T_name,
-                         self.T_size.
+                         self.T_size,
                          self.T_start,
                          self.T_end,
                          self.block_count,
