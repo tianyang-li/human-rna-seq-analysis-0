@@ -72,7 +72,7 @@ def blat_reader(blat_file):
         for line in fin:
             yield BlatEntry(line)
 
-def paired_end(blat_file1, blat_file2):
+def paired_end(blat_file1, blat_file2, max_inner_dist):
     """
     assumes that PSL files are already sorted like this
         sort -k10,10 -k14,14
@@ -80,6 +80,10 @@ def paired_end(blat_file1, blat_file2):
     
     each pair the name is like this:
         X/1    X/2
+        
+    max_inner_dist: For, example, for paired end runs with 
+        fragments selected at 300bp, where each end is 50bp, 
+        you should set it to be 200. 
     """
     
     
