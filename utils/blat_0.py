@@ -42,7 +42,7 @@ class BlatEntry(object):
     def __init__(self, line):
         line = line.strip()
         entries = line.split("\t")
-        self.matches = int(entries[0])
+        self.matches = int(entries[0])  
         self.mis_matches = int(entries[1])
         self.rep_matches = int(entries[2])
         self.N_count = int(entries[3])
@@ -66,13 +66,44 @@ class BlatEntry(object):
         self.Q_starts = map(lambda s:int(s), self.Q_starts)
         self.T_starts = entries[20].split(",")[:-1]
         self.T_starts = map(lambda s:int(s), self.T_starts)
+    
+    def __str__(self):
+        return ("%d\t%d\t%d\t%d\t"
+                "%d\t%d\t%d\t%d\t"
+                "%s\t%s\t%d\t%d\t"
+                "%d\t%s\t%d\t%d\t"
+                "%d\t%d\t%s\t%s\t"
+                "%s") % (self.matches,
+                         self.mis_matches,
+                         self.rep_matches,
+                         self.N_count,
+                         self.Q_num_insert,
+                         self.Q_base_insert,
+                         self.T_num_insert,
+                         self.T_base_insert,
+                         self.strand,
+                         self.Q_name,
+                         self.Q_size,
+                         self.Q_start,
+                         self.Q_end,
+                         self.T_name,
+                         self.T_size.
+                         self.T_start,
+                         self.T_end,
+                         self.block_count,
+                         "".join(map(lambda d:"%d," % d,
+                                     self.block_sizes)),
+                         "".join(map(lambda d:"%d," % d,
+                                     self.Q_starts)),
+                         "".join(map(lambda d:"%d," % d,
+                                     self.T_starts)))
 
 def blat_reader(blat_file):
     with open(blat_file, 'r') as fin:
         for line in fin:
             yield BlatEntry(line)
 
-def paired_end(blat_file1, blat_file2, max_inner_dist):
+def paired_end(blat_file1, blat_file2, max_inner_dist=None):
     """
     assumes that PSL files are already sorted like this
         sort -k10,10 -k14,14
@@ -85,6 +116,8 @@ def paired_end(blat_file1, blat_file2, max_inner_dist):
         fragments selected at 300bp, where each end is 50bp, 
         you should set it to be 200. 
     """
+    if not max_inner_dist:
+        max_inner_dist = float('inf')
     
     
 
