@@ -103,6 +103,12 @@ def blat_reader(blat_file):
         for line in fin:
             yield BlatEntry(line)
 
+class PairedBlatEntry(object):
+    def __init__(self, blat_entry1, blat_entry2):
+        self.blat_entry1 = blat_entry1
+        self.blat_entry2 = blat_entry2
+        
+
 def paired_end(blat_file1, blat_file2, max_inner_dist=None):
     """
     assumes that PSL files are already sorted like this
@@ -119,5 +125,22 @@ def paired_end(blat_file1, blat_file2, max_inner_dist=None):
     if not max_inner_dist:
         max_inner_dist = float('inf')
     
+    blat_it1 = blat_reader(blat_file1)
+    blat_it2 = blat_reader(blat_file2)
     
+    it1_end = False
+    it2_end = False
+    
+    cur_frag_name = None
+    
+    while not it1_end or not it2_end:
+        try:
+            blat1 = blat_it1.next()
+        except StopIteration:
+            it1_end = True
+        try:
+            blat2 = blat_it2.next()
+        except StopIteration:
+            it1_end = True
+        
 

@@ -37,9 +37,8 @@ def main():
         or not blat_file2):
         print >> sys.stderr, "missing"
         sys.exit(1)
+    
         
-    for blat_entry in blat_reader(blat_file1):
-        print blat_entry
-
+    
 if __name__ == '__main__':
     main()
