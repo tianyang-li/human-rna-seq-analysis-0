@@ -158,5 +158,7 @@ def paired_end(blat_file1, blat_file2, max_inner_dist=None):
             pair1 = {blat1.T_name: blat1}
             pair2 = {}
             cur_frag_name = blat1.Q_name.split("/")[0]
+            
+    #TODO: 
         
 
