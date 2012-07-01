@@ -131,16 +131,32 @@ def paired_end(blat_file1, blat_file2, max_inner_dist=None):
     it1_end = False
     it2_end = False
     
-    cur_frag_name = None
+    # XXX: 2 files cannot be empty
+    blat1 = blat_it1.next()
+    blat2 = blat_it2.next()
+    cur_frag_name = blat1.Q_name.split("/")[0]
+    pair1 = {blat1.T_name: blat1}
+    pair2 = {}
     
     while not it1_end or not it2_end:
-        try:
-            blat1 = blat_it1.next()
-        except StopIteration:
-            it1_end = True
-        try:
-            blat2 = blat_it2.next()
-        except StopIteration:
-            it1_end = True
+        
+        while not it1_end and blat1.Q_name.split("/")[0] == cur_frag_name:
+            try:
+                blat1 = blat_it1.next()
+                pair1[blat1.T_name] = blat1
+            except StopIteration:
+                it1_end = True
+        
+        while not it2_end and blat2.Q_name.split("/")[0] == cur_frag_name:
+            try:
+                blat2 = blat_it2.next()
+                pair2[blat2.T_name] = blat2
+            except StopIteration:
+                it1_end = True
+        
+        if not it1_end and not it2_end:
+            pair1 = {blat1.T_name: blat1}
+            pair2 = {}
+            cur_frag_name = blat1.Q_name.split("/")[0]
         
 
