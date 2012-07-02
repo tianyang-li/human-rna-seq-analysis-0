@@ -2,6 +2,7 @@
 *.psl
 *.sam
 *.bam
+*.bai
 
 # eclipse project file
 .*project
