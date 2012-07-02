@@ -18,21 +18,27 @@
 import getopt
 import sys
 
+from util.gtf_0 import gtf_reader
+
 def main():
-    paired_bam_file = None
+    gtf_file = None
     try:
-        opts, _ = getopt.getopt(sys.argv[1:], '', ['bam='])
+        opts, _ = getopt.getopt(sys.argv[1:], '', ['gtf='])
     except getopt.GetoptError as err:
         print >> sys.stderr, str(err)
         sys.exit(1)
     for opt, arg in opts:
-        if opt == '--bam':
-            paired_bam_file = arg
-    if not paired_bam_file:
-        print >> sys.stderr, "missing"
+        if opt == '--gtf':
+            gtf_file = arg
+    if not gtf_file:
+        print >> sys.stderr, "misisng"
         sys.exit(1)
+    
+    for gtf_entry in gtf_reader(gtf_file):
+        if gtf_entry.feature == "exon":
+            print gtf_entry
 
 if __name__ == '__main__':
-    main()    
+    main()
 
 
