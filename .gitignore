@@ -4,6 +4,11 @@
 *.bam
 *.bai
 
+*.gtf
+*.gff
+*.fasta
+*.fastq
+
 # eclipse project file
 .*project
 
