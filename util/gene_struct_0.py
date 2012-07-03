@@ -28,7 +28,7 @@ class Chr(object):
     
     def search(self, cur_ex):
         l = 0
-        r = len(self.exons)
+        r = len(self.exons) - 1
         while l < r:
             m = int((l + r) / 2)
             if self.exons[m] == cur_ex:
@@ -39,9 +39,9 @@ class Chr(object):
                 l = m + 1
         if l > r:
             raise StrException("l > r in Chr.search")
-        if self.exons[m] != cur_ex:
+        if self.exons[l] != cur_ex:
             raise StrException("self.exons[m] != cur_ex in Chr.search")
-        return self.exons[m]
+        return self.exons[r]
 
 class Exon(object):
     def __init__(self, start, end, connect=True):
