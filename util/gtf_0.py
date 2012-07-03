@@ -15,6 +15,8 @@
 #
 #  You should have received a copy of the GNU General Public License
 
+import re
+
 """
 Structure is as GFF, so the fields are: 
     < seqname > 
@@ -84,5 +86,17 @@ def gtf_reader(gtf_file):
         for line in fin:
             yield GTFEntry(line.strip())
 
+def get_transcripts_exons(gtf_file):
+    ts_ids = {}
+    for gtf_entry in gtf_reader(gtf_file):
+        if gtf_entry.feature == "exon":
+            t_id = re.search(r'transcript_id\s*"(\w*)"',
+                                      gtf_entry.attributes).group(1)
+            ts_ids.setdefault(t_id, []).append(gtf_entry)
+    return ts_ids
 
-
+def build_gene_loci(tr_exs):
+    """
+    tr_exs has to be in the format of the output of 
+        get_transcripts_exons
+    """

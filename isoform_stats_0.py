@@ -17,9 +17,8 @@
 
 import getopt
 import sys
-import re
 
-from util.gtf_0 import gtf_reader
+from util.gtf_0 import get_transcripts_exons, build_gene_loci
 
 def main():
     gtf_file = None
@@ -35,11 +34,8 @@ def main():
         print >> sys.stderr, "misisng"
         sys.exit(1)
     
-    gene_ids = {}
-    for gtf_entry in gtf_reader(gtf_file):
-        transcript_id = re.search(r'transcript_id\s*"(\w*)"',
-                                  gtf_entry.attributes).group(1)
-        
+    tr_exs = get_transcripts_exons(gtf_file)
+    gene_loci = build_gene_loci(tr_exs)
 
 if __name__ == '__main__':
     main()
