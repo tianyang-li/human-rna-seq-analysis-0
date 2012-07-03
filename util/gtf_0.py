@@ -43,7 +43,16 @@ class GTFEntry(object):
         self.seqname = entries[0]
         self.source = entries[1]
         self.feature = entries[2]
-        self.start = int(entries[3])
+        """
+        <start> <end> 
+        Integer start and end coordinates of the feature relative to 
+        the beginning of the sequence named in <seqname>.  
+        <start> must be less than or equal to <end>. 
+        Sequence numbering starts at 1. Values of <start> and <end> 
+        that extend outside the reference sequence are technically 
+        acceptable, but they are discouraged.
+        """
+        self.start = int(entries[3]) - 1
         self.end = int(entries[4])
         if entries[5] == ".":
             self.score = None
@@ -94,9 +103,3 @@ def get_transcripts_exons(gtf_file):
                                       gtf_entry.attributes).group(1)
             ts_ids.setdefault(t_id, []).append(gtf_entry)
     return ts_ids
-
-def build_gene_loci(tr_exs):
-    """
-    tr_exs has to be in the format of the output of 
-        get_transcripts_exons
-    """

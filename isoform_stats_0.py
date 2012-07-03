@@ -18,7 +18,8 @@
 import getopt
 import sys
 
-from util.gtf_0 import get_transcripts_exons, build_gene_loci
+from util.gtf_0 import get_transcripts_exons
+from util.gene_struct_0 import build_gene_loci
 
 def main():
     gtf_file = None
