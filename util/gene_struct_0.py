@@ -52,8 +52,9 @@ def build_gene_loci(tr_exs):
         chr = chrs.setdefault(exs[0].seqname, set([]))
         for ex in exs:
             chr.add(Exon(ex.start, ex.end))
-    for chr in chrs.itervalues():
-        chr = sorted(list(chr), cmp=Exon.exon_cmp)
-        
+    for chr_name, chr in chrs.iteritems():
+        chrs[chr_name] = sorted(list(chr), cmp=Exon.exon_cmp)
+    
+    
     
     
