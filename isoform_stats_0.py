@@ -17,6 +17,7 @@
 
 import getopt
 import sys
+import re
 
 from util.gtf_0 import gtf_reader
 
@@ -36,6 +37,8 @@ def main():
     
     gene_ids = {}
     for gtf_entry in gtf_reader(gtf_file):
+        transcript_id = re.search(r'transcript_id\s*"(\w*)"',
+                                  gtf_entry.attributes).group(1)
         
 
 if __name__ == '__main__':
