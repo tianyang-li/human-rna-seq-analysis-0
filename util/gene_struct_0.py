@@ -38,7 +38,7 @@ class Exon(object):
         return hash((self.start, self.end))
     
     @staticmethod
-    def cmp(a, b):
+    def exon_cmp(a, b):
         return a.__cmp__(b)
     
 
@@ -53,7 +53,7 @@ def build_gene_loci(tr_exs):
         for ex in exs:
             chr.add(Exon(ex.start, ex.end))
     for chr in chrs.itervalues():
-        chr = sorted(list(chr), cmp=Exon.cmp)
+        chr = sorted(list(chr), cmp=Exon.exon_cmp)
         
     
     
