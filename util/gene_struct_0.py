@@ -37,10 +37,6 @@ class Chr(object):
                 r = m - 1
             else:
                 l = m + 1
-        if l > r:
-            raise StrException("l > r in Chr.search")
-        if self.exons[l] != cur_ex:
-            raise StrException("self.exons[m] != cur_ex in Chr.search")
         return self.exons[r]
 
 class Exon(object):
@@ -97,11 +93,7 @@ def build_gene_loci(tr_exs):
     for tr_name, tmp_tr in mod_tr_exs.iteritems():
         chr_exs = []
         for tmp_ex in tmp_tr.exs:
-            try:
-                chr_exs.append(chrs[tmp_tr.chr_name].search(tmp_ex))
-            except StrException as err:
-                print >> sys.stderr, str(err)
-                return
+            chr_exs.append(chrs[tmp_tr.chr_name].search(tmp_ex))
         if len(chr_exs) > 1:
             chr_exs[0].right_exons.append(chr_exs[1])
             chr_exs[-1].left_exons.append(chr_exs[-2])
