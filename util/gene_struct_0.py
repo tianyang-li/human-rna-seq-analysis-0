@@ -15,14 +15,33 @@
 #
 #  You should have received a copy of the GNU General Public License
 
+from __future__ import division
+
 from itertools import izip
+import sys
+
+from util.exception_0 import StrException
 
 class Chr(object):
     def __init__(self, exons):
         self.exons = exons
     
     def search(self, cur_ex):
-        pass
+        l = 0
+        r = len(self.exons)
+        while l < r:
+            m = int((l + r) / 2)
+            if self.exons[m] == cur_ex:
+                return self.exons[m]
+            if self.exons[m] > cur_ex:
+                r = m - 1
+            else:
+                l = m + 1
+        if l > r:
+            raise StrException("l > r in Chr.search")
+        if self.exons[m] != cur_ex:
+            raise StrException("self.exons[m] != cur_ex in Chr.search")
+        return self.exons[m]
 
 class Exon(object):
     def __init__(self, start, end, connect=True):
@@ -78,7 +97,11 @@ def build_gene_loci(tr_exs):
     for tr_name, tmp_tr in mod_tr_exs.iteritems():
         chr_exs = []
         for tmp_ex in tmp_tr.exs:
-            chr_exs.append(chrs[tmp_tr.chr_name].search(tmp_ex))
+            try:
+                chr_exs.append(chrs[tmp_tr.chr_name].search(tmp_ex))
+            except StrException as err:
+                print >> sys.stderr, str(err)
+                return
         if len(chr_exs) > 1:
             chr_exs[0].right_exons.append(chr_exs[1])
             chr_exs[-1].left_exons.append(chr_exs[-2])
