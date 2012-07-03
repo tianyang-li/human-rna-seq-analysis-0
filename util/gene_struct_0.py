@@ -15,16 +15,22 @@
 #
 #  You should have received a copy of the GNU General Public License
 
+from itertools import izip
+
 class Chr(object):
-    def __init__(self):
-        self.exons = []
+    def __init__(self, exons):
+        self.exons = exons
+    
+    def search(self, cur_ex):
+        pass
 
 class Exon(object):
-    def __init__(self, start, end):
+    def __init__(self, start, end, connect=True):
         self.start = start
         self.end = end
-        self.left_exons = []
-        self.right_exons = []
+        if connect:
+            self.left_exons = []
+            self.right_exons = []
     
     def get_len(self):
         self.end - self.start
@@ -53,8 +59,30 @@ def build_gene_loci(tr_exs):
         for ex in exs:
             chr.add(Exon(ex.start, ex.end))
     for chr_name, chr in chrs.iteritems():
-        chrs[chr_name] = sorted(list(chr), cmp=Exon.exon_cmp)
+        chrs[chr_name] = Chr(sorted(list(chr), cmp=Exon.exon_cmp))
     
+    mod_tr_exs = {}
     
+    class TmpTr(object):
+        def __init__(self, exs, chr_name):
+            self.exs = exs
+            self.chr_name = chr_name
     
+    for tr_name, exs in tr_exs.iteritems():
+        mod_exs = []
+        for ex in exs:
+            mod_exs.append(Exon(ex.start, ex.end, connect=False))
+        mod_exs = sorted(mod_exs, cmp=Exon.exon_cmp)
+        mod_tr_exs[tr_name] = TmpTr(mod_exs, exs[0].seqname)
+    
+    for tr_name, tmp_tr in mod_tr_exs.iteritems():
+        chr_exs = []
+        for tmp_ex in tmp_tr.exs:
+            chr_exs.append(chrs[tmp_tr.chr_name].search(tmp_ex))
+        if len(chr_exs) > 1:
+            chr_exs[0].right_exons.append(chr_exs[1])
+            chr_exs[-1].left_exons.append(chr_exs[-2])
+        for chr_ex, i in izip(chr_exs[1:-1], xrange(1, len(chr_exs) - 1)):
+            chr_ex.left_contigs = chr_exs[i - 1]
+            chr_ex.right_contigs = chr_exs[i + 1]
     
