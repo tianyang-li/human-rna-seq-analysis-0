@@ -43,6 +43,7 @@ class Exon(object):
         if connect:
             self.left_exons = []
             self.right_exons = []
+            self.transcript_ids = None
     
     def get_len(self):
         self.end - self.start
@@ -62,6 +63,7 @@ class Exon(object):
 class GeneLocus(object):
     def __init__(self):
         self.exons = []
+        self.transcript_ids = []
 
 def build_gene_loci(tr_exs):
     """
@@ -69,12 +71,26 @@ def build_gene_loci(tr_exs):
         gtf_0.get_transcripts_exons
     """
     chrs = {}
-    for exs in tr_exs.itervalues():
+    
+    exon_t_ids = {}  
+    # each entry is transcript_id: set of 
+    # transcript's names that contain this exon 
+    
+    for tr_name, exs in tr_exs.iteritems():
         chrm = chrs.setdefault(exs[0].seqname, set([]))
         for ex in exs:
-            chrm.add(Exon(ex.start, ex.end))
+            cur_ex = Exon(ex.start, ex.end)
+            chrm.add(cur_ex)
+            exon_t_ids.setdefault(cur_ex, set([])).add(tr_name)
+            
+    for ex, tr_names in exon_t_ids.iteritems():
+        exon_t_ids[ex] = list(tr_names)
+            
     for chr_name, chrm in chrs.iteritems():
-        chrs[chr_name] = ExonsChr(sorted(list(chrm), cmp=Exon.exon_cmp))
+        cur_chrom = ExonsChr(sorted(list(chrm), cmp=Exon.exon_cmp))
+        for ex in cur_chrom.exons:
+            ex.transcript_ids = exon_t_ids[ex]
+        chrs[chr_name] = cur_chrom
     
     mod_tr_exs = {}
     
