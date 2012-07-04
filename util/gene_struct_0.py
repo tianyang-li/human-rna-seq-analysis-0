@@ -17,31 +17,13 @@
 
 from __future__ import division
 
-from itertools import izip
-
 class ExonSet(object):
     def __init__(self, exons):
         self.exons = exons  # a list of exons
 
-    def search(self, cur_ex):
-        """
-        assumes that cur_ex will always be found
-        in self.exons
-        """
-        l = 0
-        r = len(self.exons) - 1
-        while l < r:
-            m = int((l + r) / 2)
-            if self.exons[m] == cur_ex:
-                return self.exons[m]
-            if self.exons[m] > cur_ex:
-                r = m - 1
-            else:
-                l = m + 1
-        return self.exons[r]        
-
 class Exon(object):
     def __init__(self, start, end, connect=True):
+        # python indexing
         self.start = start
         self.end = end
         if connect:
@@ -62,6 +44,17 @@ class Exon(object):
     @staticmethod
     def exon_cmp(a, b):
         return a.__cmp__(b)
+    
+    def overlap(self, other):
+        if self.end <= other.start:
+            return False
+        if self.start >= other.end:
+            return False
+        return True
+    
+    @staticmethod
+    def exon_overlap(a, b):
+        return a.overlap(b)
 
 class GeneLocus(ExonSet):
     def __init__(self, exs):
@@ -73,87 +66,29 @@ def build_gene_loci(tr_exs):
     tr_exs has to be in the format of the output of 
         gtf_0.get_transcripts_exons
     """
-    chrs = {}
     
-    exon_t_ids = {}  
-    # each entry is transcript_id: set of 
-    # transcript's names that contain this exon 
+    chrm_exs = {}
     
-    for tr_name, exs in tr_exs.iteritems():
-        chrm = chrs.setdefault(exs[0].seqname, set([]))
+    for tr_ex in tr_exs.itervalues():
+        chrm_name = tr_ex[0].seqname
+        for ex in tr_ex:
+            chrm_exs.setdefault(chrm_name, set([])).add(Exon(ex.start, ex.end))
+    
+    for chrm_name, exs in chrm_exs.iteritems():
+        exs = sorted(list(exs), cmp=Exon.exon_cmp)
+        fixed_exs = []
+        i = 0
+        cur_block = set([])
         for ex in exs:
-            cur_ex = Exon(ex.start, ex.end)
-            chrm.add(cur_ex)
-            exon_t_ids.setdefault(cur_ex, set([])).add(tr_name)
-            
-    for ex, tr_names in exon_t_ids.iteritems():
-        exon_t_ids[ex] = list(tr_names)
-            
-    for chr_name, chrm in chrs.iteritems():
-        cur_chrom = ExonSet(sorted(list(chrm), cmp=Exon.exon_cmp))
-        chrs[chr_name] = cur_chrom
-    
-    mod_tr_exs = {}
-    
-    class TmpTr(ExonSet):
-        def __init__(self, exs, chr_name):
-            super(TmpTr, self).__init__(exs)
-            self.chr_name = chr_name
-    
-    for tr_name, exs in tr_exs.iteritems():
-        mod_exs = []
-        for ex in exs:
-            mod_exs.append(Exon(ex.start, ex.end, connect=False))
-        mod_exs = sorted(mod_exs, cmp=Exon.exon_cmp)
-        mod_tr_exs[tr_name] = TmpTr(mod_exs, exs[0].seqname)
-    
-    for tr_name, tmp_tr in mod_tr_exs.iteritems():
-        chr_exs = []
-        for tmp_ex in tmp_tr.exons:
-            chr_exs.append(chrs[tmp_tr.chr_name].search(tmp_ex))
-        if len(chr_exs) > 1:
-            chr_exs[0].right_exons.append(chr_exs[1])
-            chr_exs[-1].left_exons.append(chr_exs[-2])
-        for chr_ex, i in izip(chr_exs[1:-1], xrange(1, len(chr_exs) - 1)):
-            chr_ex.left_exons.append(chr_exs[i - 1])
-            chr_ex.right_exons.append(chr_exs[i + 1])
+            cur_block.add(ex.start)
+            cur_block.add(ex.end)
+        cur_block = sorted(list(cur_block))
+        for i in xrange(0, len(cur_block) - 1):
+            fixed_exs.append(Exon(cur_block[i], cur_block[i + 1]))
+        chrm_exs[chrm_name] = fixed_exs
     
     gene_loci = {}
-    for chr_name, chrm in chrs.iteritems():
-        cur_gene_loci = []
-        locusized_exs = set([])
-        for ex in chrm.exons:
-            if ex not in locusized_exs:
-                
-                def get_gene_locus(cur_ex):
-                    my_locus = [cur_ex]
-                    locusized_exs.add(cur_ex)
-                    for l_ex in cur_ex.left_exons:
-                        if l_ex not in locusized_exs:
-                            my_locus.extend(get_gene_locus(l_ex))
-                    for r_ex in cur_ex.right_exons:
-                        if r_ex not in locusized_exs:
-                            my_locus.extend(get_gene_locus(r_ex))
-                    return my_locus
-                
-                cur_gene_locus = get_gene_locus(ex)
-                if cur_gene_locus:
-                    cur_gene_locus = sorted(cur_gene_locus, cmp=Exon.exon_cmp)
-                    cur_gl = GeneLocus(cur_gene_locus)
-                    cur_ts = set([])
-                    for ex in cur_gene_locus:
-                        for t_id in exon_t_ids[ex]:
-                            cur_ts.add(t_id)
-                    t_exs = {}
-                    for t_id in cur_ts:
-                        cur_t_exs = set([])
-                        for ex in mod_tr_exs[t_id].exons:
-                            cur_t_exs.add(cur_gl.search(ex))
-                        cur_t_exs = list(cur_t_exs)
-                        t_exs[t_id] = sorted(cur_t_exs, cmp=Exon.exon_cmp)
-                    cur_gl.transcript_ids = t_exs 
-                    cur_gene_loci.append(cur_gl)
-        gene_loci[chr_name] = cur_gene_loci
+
     return gene_loci
 
 
