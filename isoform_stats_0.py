@@ -47,10 +47,10 @@ def main():
             for tr_exs in gl.transcript_ids.itervalues():
                 left_diff = False
                 right_diff = False
-                if tr_exs[0].start != gl.exons[0].start:
+                if tr_exs[0].left_exons:
                     left_diff = True
                     left_end_diff += 1 
-                if tr_exs[-1].end != gl.exons[-1].end:
+                if tr_exs[-1].right_exons:
                     right_diff = True
                     right_end_diff += 1
                 if left_diff and right_diff:
