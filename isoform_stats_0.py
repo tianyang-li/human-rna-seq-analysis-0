@@ -40,7 +40,7 @@ def main():
     
     for chr_gl in gene_loci.itervalues():
         for gl in chr_gl:
-            gl_ex_num = len(gl.exons)
+            gl_tr_num = len(gl.transcript_ids)
             left_end_diff = 0
             right_end_diff = 0
             both_ends_diff = 0
@@ -55,7 +55,7 @@ def main():
                     right_end_diff += 1
                 if left_diff and right_diff:
                     both_ends_diff += 1
-            print gl_ex_num, left_end_diff, right_end_diff, both_ends_diff
+            print gl_tr_num, left_end_diff, right_end_diff, both_ends_diff
 
 if __name__ == '__main__':
     main()
