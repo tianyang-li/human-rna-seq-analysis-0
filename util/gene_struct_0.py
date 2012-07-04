@@ -19,11 +19,15 @@ from __future__ import division
 
 from itertools import izip
 
-class ExonsChr(object):
+class ExonSet(object):
     def __init__(self, exons):
-        self.exons = exons
-    
+        self.exons = exons  # a list of exons
+
     def search(self, cur_ex):
+        """
+        assumes that cur_ex will always be found
+        in self.exons
+        """
         l = 0
         r = len(self.exons) - 1
         while l < r:
@@ -34,7 +38,7 @@ class ExonsChr(object):
                 r = m - 1
             else:
                 l = m + 1
-        return self.exons[r]
+        return self.exons[r]        
 
 class Exon(object):
     def __init__(self, start, end, connect=True):
@@ -59,10 +63,10 @@ class Exon(object):
     def exon_cmp(a, b):
         return a.__cmp__(b)
 
-class GeneLocus(object):
-    def __init__(self, exs, t_ids=[]):
-        self.exons = exs
-        self.transcript_ids = t_ids
+class GeneLocus(ExonSet):
+    def __init__(self, exs):
+        super(GeneLocus, self).__init__(exs)
+        self.transcript_ids = None  # dictionary of each transcript's exons
 
 def build_gene_loci(tr_exs):
     """
@@ -86,14 +90,14 @@ def build_gene_loci(tr_exs):
         exon_t_ids[ex] = list(tr_names)
             
     for chr_name, chrm in chrs.iteritems():
-        cur_chrom = ExonsChr(sorted(list(chrm), cmp=Exon.exon_cmp))
+        cur_chrom = ExonSet(sorted(list(chrm), cmp=Exon.exon_cmp))
         chrs[chr_name] = cur_chrom
     
     mod_tr_exs = {}
     
-    class TmpTr(object):
+    class TmpTr(ExonSet):
         def __init__(self, exs, chr_name):
-            self.exs = exs
+            super(TmpTr, self).__init__(exs)
             self.chr_name = chr_name
     
     for tr_name, exs in tr_exs.iteritems():
@@ -105,7 +109,7 @@ def build_gene_loci(tr_exs):
     
     for tr_name, tmp_tr in mod_tr_exs.iteritems():
         chr_exs = []
-        for tmp_ex in tmp_tr.exs:
+        for tmp_ex in tmp_tr.exons:
             chr_exs.append(chrs[tmp_tr.chr_name].search(tmp_ex))
         if len(chr_exs) > 1:
             chr_exs[0].right_exons.append(chr_exs[1])
@@ -136,11 +140,17 @@ def build_gene_loci(tr_exs):
                 if cur_gene_locus:
                     cur_gene_locus = sorted(cur_gene_locus, cmp=Exon.exon_cmp)
                     cur_gl = GeneLocus(cur_gene_locus)
-                    t_ids = set([])
-                    for ex in cur_gl.exons:
+                    cur_ts = set([])
+                    for ex in cur_gene_locus:
                         for t_id in exon_t_ids[ex]:
-                            t_ids.add(t_id)
-                    cur_gl.transcript_ids = list(t_ids)
+                            cur_ts.add(t_id)
+                    t_exs = {}
+                    for t_id in cur_ts:
+                        cur_t_exs = []
+                        for ex in mod_tr_exs[t_id].exons:
+                            cur_t_exs.append(cur_gl.search(ex))
+                        t_exs[t_id] = sorted(cur_t_exs, cmp=Exon.exon_cmp)
+                    cur_gl.transcript_ids = t_exs 
                     cur_gene_loci.append(cur_gl)
         gene_loci[chr_name] = cur_gene_loci
     return gene_loci
