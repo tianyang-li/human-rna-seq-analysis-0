@@ -133,7 +133,15 @@ def build_gene_loci(tr_exs):
         end_exon = get_exon_by_end()
         
         t_fixed_exs[tr_name] = fixed_exs[start_exon:end_exon + 1]
-        
+    
+    for fixed_exs in t_fixed_exs.itervalues():
+        if len(fixed_exs) > 1:
+            fixed_exs[0].right_exons.append(fixed_exs[1])
+            fixed_exs[-1].left_exons.append(fixed_exs[-2])
+        for i in xrange(1, len(fixed_exs) - 1):
+            fixed_exs[i].right_exons.append(fixed_exs[i + 1])
+            fixed_exs[i].left_exons.append(fixed_exs[i - 1])
+    
     gene_loci = {}
 
     return gene_loci
