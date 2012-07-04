@@ -43,7 +43,6 @@ class Exon(object):
         if connect:
             self.left_exons = []
             self.right_exons = []
-            self.transcript_ids = None
     
     def get_len(self):
         self.end - self.start
@@ -61,9 +60,9 @@ class Exon(object):
         return a.__cmp__(b)
 
 class GeneLocus(object):
-    def __init__(self):
-        self.exons = []
-        self.transcript_ids = []
+    def __init__(self, exs, t_ids=[]):
+        self.exons = exs
+        self.transcript_ids = t_ids
 
 def build_gene_loci(tr_exs):
     """
@@ -88,8 +87,6 @@ def build_gene_loci(tr_exs):
             
     for chr_name, chrm in chrs.iteritems():
         cur_chrom = ExonsChr(sorted(list(chrm), cmp=Exon.exon_cmp))
-        for ex in cur_chrom.exons:
-            ex.transcript_ids = exon_t_ids[ex]
         chrs[chr_name] = cur_chrom
     
     mod_tr_exs = {}
@@ -138,7 +135,13 @@ def build_gene_loci(tr_exs):
                 cur_gene_locus = get_gene_locus(ex)
                 if cur_gene_locus:
                     cur_gene_locus = sorted(cur_gene_locus, cmp=Exon.exon_cmp)
-                    cur_gene_loci.append(cur_gene_locus)
+                    cur_gl = GeneLocus(cur_gene_locus)
+                    t_ids = set([])
+                    for ex in cur_gl.exons:
+                        for t_id in exon_t_ids[ex]:
+                            t_ids.add(t_id)
+                    cur_gl.transcript_ids = list(t_ids)
+                    cur_gene_loci.append(cur_gl)
         gene_loci[chr_name] = cur_gene_loci
     return gene_loci
 
