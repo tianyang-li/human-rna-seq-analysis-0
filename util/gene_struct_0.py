@@ -59,7 +59,7 @@ class Exon(object):
 class GeneLocus(ExonSet):
     def __init__(self, exs):
         super(GeneLocus, self).__init__(exs)
-        self.transcript_ids = None  # dictionary of each transcript's exons
+        self.transcripts = {}  # dictionary of each transcript's exons
 
 def build_gene_loci(tr_exs):
     """
@@ -87,6 +87,53 @@ def build_gene_loci(tr_exs):
             fixed_exs.append(Exon(cur_block[i], cur_block[i + 1]))
         chrm_exs[chrm_name] = fixed_exs
     
+    t_fixed_exs = {}
+    
+    for tr_name, tr_ex in tr_exs.iteritems():
+        
+        def gtf_exon_cmp(a, b):
+            if a.start == b.start:
+                return a.end - b.end
+            return a.start - b.start
+        
+        tr_ex = sorted(tr_ex, cmp=gtf_exon_cmp)
+        chrm_name = tr_ex[0].seqname
+        fixed_exs = chrm_exs[chrm_name]
+        tr_start = tr_ex[0].start
+        tr_end = tr_ex[-1].end
+        
+        def get_exon_by_start():
+            l = 0
+            r = len(fixed_exs) - 1
+            while l < r:
+                m = int((l + r) / 2)
+                if fixed_exs[m].start == tr_start:
+                    return m
+                if fixed_exs[m].start > tr_start:
+                    r = m - 1
+                else:
+                    l = m + 1
+            return l
+        
+        start_exon = get_exon_by_start()
+            
+        def get_exon_by_end():
+            l = 0
+            r = len(fixed_exs) - 1
+            while l < r:
+                m = int((l + r) / 2)
+                if fixed_exs[m].end == tr_end:
+                    return m
+                if fixed_exs[m].end > tr_end:
+                    r = m - 1
+                else:
+                    l = m + 1
+            return l
+        
+        end_exon = get_exon_by_end()
+        
+        t_fixed_exs[tr_name] = fixed_exs[start_exon:end_exon + 1]
+        
     gene_loci = {}
 
     return gene_loci
