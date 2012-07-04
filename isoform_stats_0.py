@@ -38,7 +38,11 @@ def main():
     tr_exs = get_transcripts_exons(gtf_file)
     gene_loci = build_gene_loci(tr_exs)
     
-    #TODO: analyze gene structure
+    for chr_gl in gene_loci.itervalues():
+        for gl in chr_gl:
+            gl_ex_num = len(gl.exons)
+            for tr_exs in gl.transcript_ids.itervalues():
+                print gl_ex_num, len(tr_exs) 
 
 if __name__ == '__main__':
     main()

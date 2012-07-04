@@ -146,9 +146,10 @@ def build_gene_loci(tr_exs):
                             cur_ts.add(t_id)
                     t_exs = {}
                     for t_id in cur_ts:
-                        cur_t_exs = []
+                        cur_t_exs = set([])
                         for ex in mod_tr_exs[t_id].exons:
-                            cur_t_exs.append(cur_gl.search(ex))
+                            cur_t_exs.add(cur_gl.search(ex))
+                        cur_t_exs = list(cur_t_exs)
                         t_exs[t_id] = sorted(cur_t_exs, cmp=Exon.exon_cmp)
                     cur_gl.transcript_ids = t_exs 
                     cur_gene_loci.append(cur_gl)

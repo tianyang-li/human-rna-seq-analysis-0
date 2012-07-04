@@ -18,6 +18,8 @@
 import getopt
 import sys
 
+import pysam
+
 from util.gtf_0 import get_transcripts_exons
 from util.gene_struct_0 import build_gene_loci
 
