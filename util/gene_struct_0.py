@@ -17,6 +17,8 @@
 
 from __future__ import division
 
+import sys
+
 class ExonSet(object):
     def __init__(self, exons):
         self.exons = exons  # a list of exons
@@ -80,18 +82,33 @@ def build_gene_loci(tr_exs):
         for ex in tr_ex:
             chrm_exs.setdefault(chrm_name, set([])).add(Exon(ex.start, ex.end))
     
+    max_ex_num = 0
+    
     for chrm_name, exs in chrm_exs.iteritems():
         exs = sorted(list(exs), cmp=Exon.exon_cmp)
         fixed_exs = []
         i = 0
         cur_block = set([])
-        for ex in exs:
-            cur_block.add(ex.start)
-            cur_block.add(ex.end)
-        cur_block = sorted(list(cur_block))
-        for i in xrange(0, len(cur_block) - 1):
-            fixed_exs.append(Exon(cur_block[i], cur_block[i + 1]))
+        while i < len(exs):
+            cur_ex = Exon(exs[i].start, exs[i].end)
+            cur_block.add(exs[i].start)
+            cur_block.add(exs[i].end)
+            i += 1
+            while i < len(exs) and cur_ex.overlap(exs[i]):
+                cur_block.add(exs[i].start)
+                cur_block.add(exs[i].end)
+                if exs[i].end > cur_ex.end:
+                    cur_ex.end = exs[i].end
+                i += 1
+            cur_block = sorted(list(cur_block))
+            for j in xrange(0, len(cur_block) - 1):
+                fixed_exs.append(Exon(cur_block[j], cur_block[j + 1]))
+            cur_block = set([])
         chrm_exs[chrm_name] = fixed_exs
+        if len(fixed_exs) > max_ex_num:
+            max_ex_num = len(fixed_exs)
+    
+    sys.setrecursionlimit(2 * max_ex_num)
     
     t_fixed_exs = {}
     
@@ -155,9 +172,6 @@ def build_gene_loci(tr_exs):
     gene_loci = {}
     
     for chrm_name, exs in chrm_exs.iteritems():
-        for ex in exs:
-            if ex not in ex_t_ids:
-                print "error"
         found_exs = set([])
         cur_gloci = []
         for ex in exs:
@@ -179,6 +193,8 @@ def build_gene_loci(tr_exs):
                 for ex1 in gl_exs:
                     cur_ts = cur_ts | ex_t_ids[ex1]
                 cur_gl = GeneLocus(gl_exs)
+                for t_name in cur_ts:
+                    cur_gl.transcripts[t_name] = t_fixed_exs[t_name]
                 cur_gloci.append(cur_gl)
         gene_loci[chrm_name] = cur_gloci
         
