@@ -55,7 +55,13 @@ class Exon(object):
     @staticmethod
     def exon_overlap(a, b):
         return a.overlap(b)
-
+    
+    def __repr__(self):
+        return "start: %d, end: %d" % (self.start, self.end)
+    
+    def __str__(self):
+        return self.__repr__()
+ 
 class GeneLocus(ExonSet):
     def __init__(self, exs):
         super(GeneLocus, self).__init__(exs)
@@ -149,6 +155,9 @@ def build_gene_loci(tr_exs):
     gene_loci = {}
     
     for chrm_name, exs in chrm_exs.iteritems():
+        for ex in exs:
+            if ex not in ex_t_ids:
+                print "error"
         found_exs = set([])
         cur_gloci = []
         for ex in exs:
@@ -166,6 +175,9 @@ def build_gene_loci(tr_exs):
                     return cur_exs
                 
                 gl_exs = sorted(find_gene_locus_exons(ex), Exon.exon_cmp)
+                cur_ts = set([])
+                for ex1 in gl_exs:
+                    cur_ts = cur_ts | ex_t_ids[ex1]
                 cur_gl = GeneLocus(gl_exs)
                 cur_gloci.append(cur_gl)
         gene_loci[chrm_name] = cur_gloci
