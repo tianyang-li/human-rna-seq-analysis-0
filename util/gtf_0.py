@@ -97,9 +97,9 @@ def gtf_reader(gtf_file):
 
 def get_transcripts_exons(gtf_file):
     ts_ids = {}
+    t_id_re = re.compile(r'transcript_id\s*"(\w*)"')
     for gtf_entry in gtf_reader(gtf_file):
         if gtf_entry.feature == "exon" and gtf_entry.start + 1 != gtf_entry.end:
-            t_id = re.search(r'transcript_id\s*"(\w*)"',
-                                      gtf_entry.attributes).group(1)
+            t_id = t_id_re.search(gtf_entry.attributes).group(1)
             ts_ids.setdefault(t_id, []).append(gtf_entry)
     return ts_ids

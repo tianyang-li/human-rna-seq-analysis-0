@@ -148,7 +148,7 @@ def build_gene_loci(tr_exs):
     
     gene_loci = {}
     
-    for chrm_name, exs in chrm_exs:
+    for chrm_name, exs in chrm_exs.iteritems():
         found_exs = set([])
         cur_gloci = []
         for ex in exs:
@@ -157,6 +157,12 @@ def build_gene_loci(tr_exs):
                 def find_gene_locus_exons(cur_ex):
                     found_exs.add(cur_ex)
                     cur_exs = [cur_ex]
+                    for l_ex in cur_ex.left_exons:
+                        if l_ex not in found_exs:
+                            cur_exs.extend(find_gene_locus_exons(l_ex))
+                    for r_ex in cur_ex.right_exons:
+                        if r_ex not in found_exs:
+                            cur_exs.extend(find_gene_locus_exons(r_ex))
                     return cur_exs
                 
                 gl_exs = sorted(find_gene_locus_exons(ex), Exon.exon_cmp)

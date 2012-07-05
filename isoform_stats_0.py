@@ -40,11 +40,11 @@ def main():
     
     for chr_gl in gene_loci.itervalues():
         for gl in chr_gl:
-            gl_tr_num = len(gl.transcript_ids)
+            gl_tr_num = len(gl.transcripts)
             left_end_diff = 0
             right_end_diff = 0
             both_ends_diff = 0
-            for tr_exs in gl.transcript_ids.itervalues():
+            for tr_exs in gl.transcripts.itervalues():
                 left_diff = False
                 right_diff = False
                 if tr_exs[0].left_exons:
