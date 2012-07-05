@@ -29,8 +29,8 @@ class Exon(object):
         self.start = start
         self.end = end
         if connect:
-            self.left_exons = []
-            self.right_exons = []
+            self.left_exons = set([])
+            self.right_exons = set([])
     
     def get_len(self):
         self.end - self.start
@@ -163,11 +163,15 @@ def build_gene_loci(tr_exs):
         for ex in fixed_exs:
             ex_t_ids.setdefault(ex, set([])).add(t_name)
         if len(fixed_exs) > 1:
-            fixed_exs[0].right_exons.append(fixed_exs[1])
-            fixed_exs[-1].left_exons.append(fixed_exs[-2])
+            fixed_exs[0].right_exons.add(fixed_exs[1])
+            fixed_exs[1].right_exons.add(fixed_exs[0])
+            fixed_exs[-1].left_exons.add(fixed_exs[-2])
+            fixed_exs[-2].left_exons.add(fixed_exs[-1])
         for i in xrange(1, len(fixed_exs) - 1):
-            fixed_exs[i].right_exons.append(fixed_exs[i + 1])
-            fixed_exs[i].left_exons.append(fixed_exs[i - 1])
+            fixed_exs[i].right_exons.add(fixed_exs[i + 1])
+            fixed_exs[i + 1].right_exons.add(fixed_exs[i ])
+            fixed_exs[i].left_exons.add(fixed_exs[i - 1])
+            fixed_exs[i - 1].right_exons.add(fixed_exs[i ])
     
     gene_loci = {}
     
@@ -194,7 +198,29 @@ def build_gene_loci(tr_exs):
                     cur_ts = cur_ts | ex_t_ids[ex1]
                 cur_gl = GeneLocus(gl_exs)
                 for t_name in cur_ts:
-                    cur_gl.transcripts[t_name] = t_fixed_exs[t_name]
+                    a = t_fixed_exs[t_name]
+                    cur_gl.transcripts[t_name] = a
+                    
+                    def find_ex(cur_ex):
+                        l = 0
+                        r = len(exs) - 1
+                        while l < r:
+                            m = int((l + r) / 2)
+                            if exs[m] == cur_ex:
+                                return m
+                            if exs[m] > cur_ex:
+                                r = m - 1
+                            else:
+                                l = m + 1
+                        return l
+                    
+                    for ex2 in a:
+                        ex2_loc = find_ex(ex2)
+                        if exs[ex2_loc] != ex2:
+                            print >> sys.stderr, "ex2_loc", ex2_loc, "exs[ex2_loc]", exs[ex2_loc]
+                            print >> sys.stderr, "ex2 ", ex2
+                            print >> sys.stderr, "#########"
+                    
                 cur_gloci.append(cur_gl)
         gene_loci[chrm_name] = cur_gloci
         
