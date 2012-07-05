@@ -134,7 +134,11 @@ def build_gene_loci(tr_exs):
         
         t_fixed_exs[tr_name] = fixed_exs[start_exon:end_exon + 1]
     
-    for fixed_exs in t_fixed_exs.itervalues():
+    ex_t_ids = {}
+    
+    for t_name, fixed_exs in t_fixed_exs.iteritems():
+        for ex in fixed_exs:
+            ex_t_ids.setdefault(ex, set([])).add(t_name)
         if len(fixed_exs) > 1:
             fixed_exs[0].right_exons.append(fixed_exs[1])
             fixed_exs[-1].left_exons.append(fixed_exs[-2])
@@ -143,7 +147,28 @@ def build_gene_loci(tr_exs):
             fixed_exs[i].left_exons.append(fixed_exs[i - 1])
     
     gene_loci = {}
-
+    
+    for chrm_name, exs in chrm_exs:
+        found_exs = set([])
+        cur_gloci = []
+        for ex in exs:
+            if ex not in found_exs:
+                
+                def find_gene_locus_exons(cur_ex):
+                    found_exs.add(cur_ex)
+                    cur_exs = [cur_ex]
+                    return cur_exs
+                
+                gl_exs = sorted(find_gene_locus_exons(ex), Exon.exon_cmp)
+                cur_gl = GeneLocus(gl_exs)
+                cur_gloci.append(cur_gl)
+        gene_loci[chrm_name] = cur_gloci
+        
+    """
+    return a dictionary
+        chrm_name: list of sorted gene_loci
+    """
     return gene_loci
+
 
 
