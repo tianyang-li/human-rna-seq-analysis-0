@@ -202,29 +202,7 @@ def build_gene_loci(tr_exs):
                     cur_ts = cur_ts | ex_t_ids[(ex1, chrm_name)]
                 cur_gl = GeneLocus(gl_exs)
                 for t_name in cur_ts:
-                    a = t_fixed_exs[t_name]
-                    cur_gl.transcripts[t_name] = a
-                    
-                    def find_ex(cur_ex):
-                        l = 0
-                        r = len(gl_exs) - 1
-                        while l < r:
-                            m = int((l + r) / 2)
-                            if gl_exs[m] == cur_ex:
-                                return m
-                            if gl_exs[m] > cur_ex:
-                                r = m - 1
-                            else:
-                                l = m + 1
-                        return l
-                    
-                    for ex2 in a:
-                        ex2_loc = find_ex(ex2)
-                        if gl_exs[ex2_loc] != ex2:
-                            print >> sys.stderr, "ex2_loc", ex2_loc, "gl_exs[ex2_loc]", gl_exs[ex2_loc]
-                            print >> sys.stderr, "ex2 ", ex2
-                            print >> sys.stderr, "#########"
-                    
+                    cur_gl.transcripts[t_name] = t_fixed_exs[t_name]
                 cur_gloci.append(cur_gl)
         gene_loci[chrm_name] = cur_gloci
         
