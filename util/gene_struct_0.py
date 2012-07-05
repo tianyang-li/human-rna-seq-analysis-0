@@ -207,12 +207,12 @@ def build_gene_loci(tr_exs):
                     
                     def find_ex(cur_ex):
                         l = 0
-                        r = len(exs) - 1
+                        r = len(gl_exs) - 1
                         while l < r:
                             m = int((l + r) / 2)
-                            if exs[m] == cur_ex:
+                            if gl_exs[m] == cur_ex:
                                 return m
-                            if exs[m] > cur_ex:
+                            if gl_exs[m] > cur_ex:
                                 r = m - 1
                             else:
                                 l = m + 1
@@ -220,8 +220,8 @@ def build_gene_loci(tr_exs):
                     
                     for ex2 in a:
                         ex2_loc = find_ex(ex2)
-                        if exs[ex2_loc] != ex2:
-                            print >> sys.stderr, "ex2_loc", ex2_loc, "exs[ex2_loc]", exs[ex2_loc]
+                        if gl_exs[ex2_loc] != ex2:
+                            print >> sys.stderr, "ex2_loc", ex2_loc, "gl_exs[ex2_loc]", gl_exs[ex2_loc]
                             print >> sys.stderr, "ex2 ", ex2
                             print >> sys.stderr, "#########"
                     
