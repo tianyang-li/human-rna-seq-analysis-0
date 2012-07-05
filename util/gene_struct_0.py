@@ -84,6 +84,7 @@ def build_gene_loci(tr_exs):
     
     max_ex_num = 0
     
+    tmp_chrm_exs = {}
     for chrm_name, exs in chrm_exs.iteritems():
         exs = sorted(list(exs), cmp=Exon.exon_cmp)
         fixed_exs = []
@@ -104,9 +105,11 @@ def build_gene_loci(tr_exs):
             for j in xrange(0, len(cur_block) - 1):
                 fixed_exs.append(Exon(cur_block[j], cur_block[j + 1]))
             cur_block = set([])
-        chrm_exs[chrm_name] = fixed_exs
+        tmp_chrm_exs[chrm_name] = fixed_exs
         if len(fixed_exs) > max_ex_num:
             max_ex_num = len(fixed_exs)
+    
+    chrm_exs = tmp_chrm_exs
     
     sys.setrecursionlimit(2 * max_ex_num)
     
@@ -161,17 +164,18 @@ def build_gene_loci(tr_exs):
     
     for t_name, fixed_exs in t_fixed_exs.iteritems():
         for ex in fixed_exs:
-            ex_t_ids.setdefault(ex, set([])).add(t_name)
+            ex_t_ids.setdefault((ex, tr_exs[t_name][0].seqname),
+                                set([])).add(t_name)
         if len(fixed_exs) > 1:
             fixed_exs[0].right_exons.add(fixed_exs[1])
-            fixed_exs[1].right_exons.add(fixed_exs[0])
+            fixed_exs[1].left_exons.add(fixed_exs[0])
             fixed_exs[-1].left_exons.add(fixed_exs[-2])
-            fixed_exs[-2].left_exons.add(fixed_exs[-1])
+            fixed_exs[-2].right_exons.add(fixed_exs[-1])
         for i in xrange(1, len(fixed_exs) - 1):
             fixed_exs[i].right_exons.add(fixed_exs[i + 1])
-            fixed_exs[i + 1].right_exons.add(fixed_exs[i ])
+            fixed_exs[i + 1].left_exons.add(fixed_exs[i])
             fixed_exs[i].left_exons.add(fixed_exs[i - 1])
-            fixed_exs[i - 1].right_exons.add(fixed_exs[i ])
+            fixed_exs[i - 1].right_exons.add(fixed_exs[i])
     
     gene_loci = {}
     
@@ -195,7 +199,7 @@ def build_gene_loci(tr_exs):
                 gl_exs = sorted(find_gene_locus_exons(ex), Exon.exon_cmp)
                 cur_ts = set([])
                 for ex1 in gl_exs:
-                    cur_ts = cur_ts | ex_t_ids[ex1]
+                    cur_ts = cur_ts | ex_t_ids[(ex1, chrm_name)]
                 cur_gl = GeneLocus(gl_exs)
                 for t_name in cur_ts:
                     a = t_fixed_exs[t_name]
