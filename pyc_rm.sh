@@ -1,2 +1,3 @@
 #!/bin/bash
-find -name *pyc -delete
+
+export PYTHONDONTWRITEBYTECODE=1
