@@ -38,6 +38,8 @@ def main():
     tr_exs = get_transcripts_exons(gtf_file)
     gene_loci = build_gene_loci(tr_exs)
     
+    print >> sys.stderr, len(gene_loci)
+    
     for chr_gl in gene_loci.itervalues():
         for gl in chr_gl:
             gl_ex_num = len(gl.exons)
