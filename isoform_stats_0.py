@@ -38,27 +38,10 @@ def main():
     tr_exs = get_transcripts_exons(gtf_file)
     gene_loci = build_gene_loci(tr_exs)
     
-    print >> sys.stderr, len(gene_loci)
-    
-    for chr_gl in gene_loci.itervalues():
+    for chr_name, chr_gl in gene_loci.iteritems():
+        print >> sys.stderr, chr_name, len(chr_gl)
         for gl in chr_gl:
-            gl_ex_num = len(gl.exons)
-            for tr_exs in gl.transcripts.itervalues():
-                left_end_diff = 0
-                right_end_diff = 0
-                both_ends_diff = 0
-                left_diff = False
-                right_diff = False
-                if tr_exs[0].left_exons:
-                    left_diff = True
-                    left_end_diff = 1 
-                if tr_exs[-1].right_exons:
-                    right_diff = True
-                    right_end_diff = 1
-                if left_diff and right_diff:
-                    both_ends_diff = 1
-                print gl_ex_num, len(tr_exs), left_end_diff,
-                print right_end_diff, both_ends_diff
+            print chr_name, gl.exons[0].start, gl.exons[-1].end, len(gl.exons)
 
 if __name__ == '__main__':
     main()
