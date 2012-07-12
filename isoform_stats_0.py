@@ -40,7 +40,7 @@ def main():
     
     for chr_name, chr_gl in gene_loci.iteritems():
         for gl in chr_gl:
-            print chr_name, gl.exons[0].start, gl.exons[-1].end, len(gl.exons), gl.count_chains()
+            print chr_name, gl.exons[0].start, gl.exons[-1].end, len(gl.exons)
 
 if __name__ == '__main__':
     main()

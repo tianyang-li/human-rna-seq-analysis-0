@@ -63,21 +63,33 @@ class Exon(object):
     
     def __str__(self):
         return self.__repr__()
+
+class ExonChain(ExonSet):
+    def __init__(self, exs):
+        super(ExonChain, self).__init__(exs)
+        self.left = set([])
+        self.right = set([])
+    
+    def __hash__(self):
+        return hash(tuple(self.exons))
  
 class GeneLocus(ExonSet):
     def __init__(self, exs):
         super(GeneLocus, self).__init__(exs)
         self.t_exs = {}  # dictionary of each transcript's exons
     
-    def count_chains(self):
+    def build_chains(self):
+        self.ex2chain = {}
+        self.ex_chains = []
+        
         dfsed = set([])
         
-        def count_chain_DFS(cur_ex):
+        def build_chain_DFS(cur_ex):
             if cur_ex in dfsed:
                 return
             dfsed.add(cur_ex)
         
-        count_chain_DFS(self.exons[0])
+        build_chain_DFS(self.exons[0])
                 
 
 def build_gene_loci(tr_exs):
@@ -216,6 +228,8 @@ def build_gene_loci(tr_exs):
                 for t_name in cur_ts:
                     cur_gl.t_exs[t_name] = t_fixed_exs[t_name]
                     
+                cur_gl.build_chains()
+                
                 cur_gloci.append(cur_gl)
         gene_loci[chrm_name] = cur_gloci
         
