@@ -67,7 +67,18 @@ class Exon(object):
 class GeneLocus(ExonSet):
     def __init__(self, exs):
         super(GeneLocus, self).__init__(exs)
-        self.transcripts = {}  # dictionary of each transcript's exons
+        self.t_exs = {}  # dictionary of each transcript's exons
+    
+    def count_chains(self):
+        dfsed = set([])
+        
+        def count_chain_DFS(cur_ex):
+            if cur_ex in dfsed:
+                return
+            dfsed.add(cur_ex)
+        
+        count_chain_DFS(self.exons[0])
+                
 
 def build_gene_loci(tr_exs):
     """
@@ -197,12 +208,14 @@ def build_gene_loci(tr_exs):
                     return cur_exs
                 
                 gl_exs = sorted(find_gene_locus_exons(ex), Exon.exon_cmp)
+                
                 cur_ts = set([])
                 for ex1 in gl_exs:
                     cur_ts = cur_ts | ex_t_ids[(ex1, chrm_name)]
                 cur_gl = GeneLocus(gl_exs)
                 for t_name in cur_ts:
-                    cur_gl.transcripts[t_name] = t_fixed_exs[t_name]
+                    cur_gl.t_exs[t_name] = t_fixed_exs[t_name]
+                    
                 cur_gloci.append(cur_gl)
         gene_loci[chrm_name] = cur_gloci
         

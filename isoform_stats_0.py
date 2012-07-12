@@ -39,9 +39,8 @@ def main():
     gene_loci = build_gene_loci(tr_exs)
     
     for chr_name, chr_gl in gene_loci.iteritems():
-        print >> sys.stderr, chr_name, len(chr_gl)
         for gl in chr_gl:
-            print chr_name, gl.exons[0].start, gl.exons[-1].end, len(gl.exons)
+            print chr_name, gl.exons[0].start, gl.exons[-1].end, len(gl.exons), gl.count_chains()
 
 if __name__ == '__main__':
     main()
