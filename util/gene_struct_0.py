@@ -103,7 +103,12 @@ class GeneLocus(ExonSet):
         for ex in self.exons:
             if ex not in dfsed:
                 build_chain_DFS(ex)
-                
+        
+        for chain in self.ex_chains:
+            for l_ex in chain.exons[0].left_exons:
+                chain.left.add(self.ex2chain[l_ex])
+            for r_ex in chain.exons[-1].right_exons:
+                chain.right.add(self.ex2chain[r_ex])
 
 def build_gene_loci(tr_exs):
     """
@@ -244,6 +249,7 @@ def build_gene_loci(tr_exs):
                 cur_gl.build_chains()
                 
                 cur_gloci.append(cur_gl)
+                
         gene_loci[chrm_name] = cur_gloci
         
     """
