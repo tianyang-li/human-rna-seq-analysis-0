@@ -164,12 +164,9 @@ def build_gene_loci(tr_exs):
             return a.start - b.start
         
         tr_ex = sorted(tr_ex, cmp=gtf_exon_cmp)
-        chrm_name = tr_ex[0].seqname
-        fixed_exs = chrm_exs[chrm_name]
-        tr_start = tr_ex[0].start
-        tr_end = tr_ex[-1].end
+        fixed_exs = chrm_exs[tr_ex[0].seqname]
         
-        def get_exon_by_start():
+        def get_exon_by_start(tr_start):
             l = 0
             r = len(fixed_exs) - 1
             while l < r:
@@ -181,10 +178,8 @@ def build_gene_loci(tr_exs):
                 else:
                     l = m + 1
             return l
-        
-        start_exon = get_exon_by_start()
             
-        def get_exon_by_end():
+        def get_exon_by_end(tr_end):
             l = 0
             r = len(fixed_exs) - 1
             while l < r:
@@ -197,9 +192,15 @@ def build_gene_loci(tr_exs):
                     l = m + 1
             return l
         
-        end_exon = get_exon_by_end()
+        ex_list = []
         
-        t_fixed_exs[tr_name] = fixed_exs[start_exon:end_exon + 1]
+        for ex in tr_ex:
+            ex_start = get_exon_by_start(ex.start)
+            ex_end = get_exon_by_end(ex.end)
+            
+            ex_list.extend(fixed_exs[ex_start:ex_end + 1])
+        
+        t_fixed_exs[tr_name] = ex_list 
     
     ex_t_ids = {}
     
