@@ -84,12 +84,25 @@ class GeneLocus(ExonSet):
         
         dfsed = set([])
         
-        def build_chain_DFS(cur_ex):
-            if cur_ex in dfsed:
-                return
+        def build_chain_DFS(cur_ex, prev_ex=None):
             dfsed.add(cur_ex)
+            if (not prev_ex 
+                or len(cur_ex.left_exons) != 1
+                or len(prev_ex.right_exons) != 1):
+                cur_chain = ExonChain([cur_ex])
+                self.ex2chain[cur_ex] = cur_chain
+                self.ex_chains.append(cur_chain)
+            else:
+                cur_chain = self.ex2chain[prev_ex]
+                cur_chain.exons.append(cur_ex)
+                self.ex2chain[cur_ex] = cur_chain
+            for next_ex in cur_ex.right_exons:
+                if next_ex not in dfsed:
+                    build_chain_DFS(next_ex, prev_ex=cur_ex)
         
-        build_chain_DFS(self.exons[0])
+        for ex in self.exons:
+            if ex not in dfsed:
+                build_chain_DFS(ex)
                 
 
 def build_gene_loci(tr_exs):
