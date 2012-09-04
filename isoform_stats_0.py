@@ -43,16 +43,16 @@ def main():
         for gl in chr_gl:
             for exs in gl.t_exs.itervalues():
                 ld = 0
-                ex = exs[0]
-                while ex.left_exons:
+                ex = gl.ex2chain[exs[0]]
+                while ex.left:
                     ld += 1
-                    ex = choice(ex.left_exons)
+                    ex = choice(list(ex.left))
                 rd = 0
-                ex = exs[-1]
-                while ex.right_exons:
+                ex = gl.ex2chain[exs[-1]]
+                while ex.right:
                     rd += 1
-                    ex = choice(ex.right_exons)
-                print len(exs[0].left_exons), ld, len(exs[-1].right_exons), rd
+                    ex = choice(list(ex.right))
+                print len(exs[0].left_exons), ld, len(exs[-1].right_exons), rd, len(gl.ex_chains)
 
 if __name__ == '__main__':
     main()
