@@ -17,6 +17,7 @@
 
 import getopt
 import sys
+from random import choice
 
 from util.gtf_0 import get_transcripts_exons
 from util.gene_struct_0 import build_gene_loci
@@ -41,7 +42,17 @@ def main():
     for chr_name, chr_gl in gene_loci.iteritems():
         for gl in chr_gl:
             for exs in gl.t_exs.itervalues():
-                print len(exs[0].left_exons), len(exs[-1].right_exons)
+                ld = 0
+                ex = exs[0]
+                while ex.left_exons:
+                    ld += 1
+                    ex = choice(ex.left_exons)
+                rd = 0
+                ex = exs[-1]
+                while ex.right_exons:
+                    rd += 1
+                    ex = choice(ex.right_exons)
+                print len(exs[0].left_exons), ld, len(exs[-1].right_exons), rd
 
 if __name__ == '__main__':
     main()
